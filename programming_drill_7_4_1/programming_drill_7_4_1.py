@@ -4,6 +4,10 @@ import numpy as np
 
 class QuantumGate(np.ndarray):
     @classmethod
+    def IsUnitary(cls, gate: np.ndarray):
+        return np.allclose(np.eye(len(gate)), gate @ gate.conj().T)
+
+    @classmethod
     def TensorProduct(cls, gate1, gate2):
         if gate1.shape != gate2.shape:
             raise ValueError('gate shape is invalid')
@@ -47,6 +51,8 @@ class QuantumEmulator:
     def addGate(self, gate: QuantumGate):
         if gate.shape != (2**self.n, 2**self.n):
             raise ValueError('gate shape is invalid')
+        if not QuantumGate.IsUnitary(gate):
+            raise ValueError('gate is not unitary')
         self.gates.append(gate)
 
     def resetGates(self):
