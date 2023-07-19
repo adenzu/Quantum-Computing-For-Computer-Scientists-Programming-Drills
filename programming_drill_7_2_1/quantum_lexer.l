@@ -18,7 +18,7 @@ U{INT}? {printf("OPRT");}
 RES {printf("RES");}
 
 H {printf("HDMR");}
-R"_("{INT}/{INT}")" {printf("ROTT");}
+R"_("{INT}"/"{INT}")" {printf("ROTT");}
 I"_"{INT} {printf("IDNT");}
 CNOT {printf("CNOT");}
 
