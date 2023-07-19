@@ -5,7 +5,7 @@ import numpy as np
 class QuantumGate(np.ndarray):
     @classmethod
     def IsUnitary(cls, gate: np.ndarray):
-        return np.allclose(np.eye(len(gate)), gate @ gate.conj().T)
+        return np.allclose(np.eye(len(gate)), gate @ gate.conj().T, atol=1e-6)
 
     @classmethod
     def TensorProduct(cls, gate1, gate2):
@@ -43,10 +43,16 @@ class QuantumEmulator:
         self.n = n_qubits
         self.state = np.zeros(2**n_qubits, dtype=np.complex64)
 
-    def setInitialState(self, state: np.ndarray):
-        if state.shape != (2**self.n,):
-            raise ValueError('state shape is invalid')
-        self.state = state
+    def setInitialState(self, state: np.ndarray | int):
+        if isinstance(state, np.ndarray):
+            if state.shape != (2**self.n,):
+                raise ValueError('state shape is invalid')
+            self.state = state
+        elif isinstance(state, int):
+            self.state = np.zeros(2**self.n, dtype=np.complex64)
+            self.state[state] = 1
+        else:
+            raise ValueError('state type is invalid')
 
     def addGate(self, gate: QuantumGate):
         if gate.shape != (2**self.n, 2**self.n):
@@ -74,7 +80,7 @@ def main():
     n_samples = 10_000
 
     # test 1 - 2 qubits hadamard gates
-    qem.setInitialState(np.array([1, 0, 0, 0], dtype=np.complex64))
+    qem.setInitialState(0)
     qem.addGate(QuantumGate.TensorProduct(
         QuantumGate.Hadamard(), QuantumGate.Hadamard()))
     results = np.zeros(2**n_qubits, dtype=np.int32)
@@ -85,7 +91,7 @@ def main():
           [0.25, 0.25, 0.25, 0.25], rtol=0.04) else "Test failed")
 
     # test 2 - 2 qubits entangled hadamard gate
-    qem.setInitialState(np.array([1, 0, 0, 0], dtype=np.complex64))
+    qem.setInitialState(0)
     qem.addGate(QuantumGate.TensorProduct(
         QuantumGate.Identity(1), QuantumGate.Hadamard()))
     qem.addGate(QuantumGate.CNOT())
