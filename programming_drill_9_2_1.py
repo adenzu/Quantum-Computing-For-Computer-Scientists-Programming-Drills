@@ -18,13 +18,14 @@ def knuth(bitSent: np.ndarray[np.uint8], sendingBasis: np.ndarray[np.uint8], rec
         0, 256, len(bitSent), dtype=np.uint8)
     bitReceived = np.array([(randomByte & (sendingBasisByte ^ receivingBasisByte)) | (receivedByte & ~(sendingBasisByte ^ receivingBasisByte))
                             for randomByte, receivedByte, sendingBasisByte, receivingBasisByte in zip(randomBytes, bitSent, sendingBasis, receivingBasis)], dtype=np.uint8)
-    equalBits = np.array([byteToBits(byte) for byte in bitSent & bitReceived])
+    equalBits = np.array([byteToBits(byte)
+                         for byte in ~(bitSent ^ bitReceived)])
     accuracy = np.sum(equalBits) / (len(bitSent) * 8)
     return (bitReceived, accuracy)
 
 
 def main():
-    size = 1
+    size = 1024
     bitSent, sendingBasis = alice(size)
     receivingBasis = bob(size)
     bitReceived, accuracy = knuth(bitSent, sendingBasis, receivingBasis)
